@@ -78,6 +78,8 @@
     <div class="header">
         <h1>🎯 Bingo Literario</h1>
         <p>Juego educativo: selecciona la respuesta correcta cuando aparezca la pregunta</p>
+        <p>------</p>
+        <p style="font-weight: bold; color: rgb(214, 192, 255);">Profesora: Elva Paredez</p>
     </div>
 
     <div class="main-content">
@@ -132,6 +134,7 @@ let literaryQuestions = {
 // --- Estado de juego ---
 let drawnBalls = [];
 let remainingBalls = Object.keys(literaryQuestions);
+let pendingBalls = [] //preguntas pendientes
 let gameInterval = null;
 let isGameRunning = false;
 let currentCard = [];
@@ -183,36 +186,41 @@ function generateNewCard() {
 
 function handleCellClick(cell) {
     if (cell.classList.contains('free')) return;
-    if (!currentQuestion) return; // no hay pregunta activa
+    if (!currentQuestion) return;
 
-    // Validación manual: el usuario decide y hace clic. El sistema valida.
     if (cell.textContent === currentQuestion) {
-        cell.classList.add('marked');
-cell.classList.add('flash-correct');
-setTimeout(() => cell.classList.remove('flash-correct'), 450);
-currentQuestion = null; 
-document.getElementById('ballDisplay').textContent = '¡Correcto! Próxima pregunta en 5 segundos…';
-updateStats();
-checkBingo();
-
-// Reinicia temporizador con 5 segundos
-clearInterval(gameInterval);
-let countdown = 5;
-document.getElementById('countdown').textContent = countdown;
-gameInterval = setInterval(() => {
-    countdown--;
-    document.getElementById('countdown').textContent = countdown;
-    if (countdown <= 0) {
-        drawBall();
-        countdown = 20; // vuelve a 20 segundos para la siguiente pregunta
-    }
-}, 1000);
+        cell.classList.add('marked', 'flash-correct');
+        setTimeout(() => cell.classList.remove('flash-correct'), 450);
+        currentQuestion = null; 
+        document.getElementById('ballDisplay').textContent = '¡Correcto! Próxima pregunta en 5 segundos…';
+        updateStats();
+        checkBingo();
+        //reinicia el contador a 5 seg si la resp correcta
+        clearInterval(gameInterval);
+        let countdown = 5;
+        document.getElementById('countdown').textContent = countdown;
+        gameInterval = setInterval(() => {
+            countdown--;
+            document.getElementById('countdown').textContent = countdown;
+            if (countdown <= 0) {
+                drawBall();
+                countdown = 20;
+            }
+        }, 1000);
 
     } else {
         errorCount++;
         cell.classList.add('flash-wrong');
         setTimeout(() => cell.classList.remove('flash-wrong'), 450);
         updateStats();
+
+        // si es incorrecta, agregamos a pendingBalls para volver a sortearla
+        if (!pendingBalls.includes(currentQuestion)) {
+            pendingBalls.push(currentQuestion);
+        }
+
+        currentQuestion = null; // terminar la pregunta actual
+
         if (errorCount >= maxErrors) {
             stopGame();
             document.getElementById('ballDisplay').textContent = '❌ Has cometido demasiados errores. Fin del juego.';
@@ -274,17 +282,24 @@ function resetGame() {
 }
 
 function drawBall() {
+    // si se acabaron las preguntas del mazo, recargamos las pendientes
+    if (remainingBalls.length === 0 && pendingBalls.length > 0) {
+        remainingBalls = [...pendingBalls];
+        pendingBalls = [];
+    }
+
     if (remainingBalls.length === 0) {
         stopGame();
         document.getElementById('ballDisplay').textContent = '¡Todas las preguntas han sido sorteadas!';
         return;
     }
+
     const randomIndex = Math.floor(Math.random() * remainingBalls.length);
     const drawnAnswer = remainingBalls.splice(randomIndex, 1)[0];
     const question = literaryQuestions[drawnAnswer];
 
     drawnBalls.push(drawnAnswer);
-    currentQuestion = drawnAnswer; // ahora se espera clic correcto
+    currentQuestion = drawnAnswer;
 
     document.getElementById('ballDisplay').innerHTML = `<strong>${question}</strong><br><small>Haz clic en la respuesta correcta del cartón</small>`;
     updateDrawnBallsList();
