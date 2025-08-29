@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bingo Literario</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 40px;
+            padding: 40px;
+        }
+
+        .bingo-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .bingo-controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .bingo-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 3px;
+            background: #2c3e50;
+            padding: 10px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .bingo-cell {
+            background: white;
+            border: 2px solid #ecf0f1;
+            padding: 15px 8px;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            line-height: 1.2;
+        }
+
+        .bingo-cell:hover {
+            background: #f8f9fa;
+            transform: scale(1.02);
+        }
+
+        .bingo-cell.marked {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            border-color: #27ae60;
+            transform: scale(0.95);
+        }
+
+        .bingo-cell.free {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            color: white;
+            border-color: #95a5a6;
+            font-weight: bold;
+        }
+
+        .current-ball {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(243, 156, 18, 0.3);
+        }
+
+        .current-ball h3 {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .ball-display {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .drawn-balls {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .drawn-balls h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .ball-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .ball-item {
+            background: #3498db;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .terms-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .terms-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .terms-header h2 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+        }
+
+        .terms-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+            border: 2px solid #ecf0f1;
+        }
+
+        .term-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            transition: all 0.2s ease;
+        }
+
+        .term-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transform: translateX(5px);
+        }
+
+        .term-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            padding: 5px;
+            color: #2c3e50;
+        }
+
+        .term-input:focus {
+            outline: none;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
+            transform: scale(1.1);
+        }
+
+        .add-term {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .add-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .add-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .size-controls {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .size-controls label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-right: 10px;
+        }
+
+        .size-select {
+            padding: 8px 15px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+        }
+
+        .stats {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .stats p {
+            margin: 5px 0;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .bingo-cell {
+                font-size: 0.75rem;
+                min-height: 60px;
+                padding: 8px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Bingo Literario</h1>
+            <p>Juego educativo para explorar el mundo de la literatura</p>
+        </div>
+
+        <div class="main-content">
+            <div class="bingo-section">
+                <div class="bingo-controls">
+                    <button class="btn" onclick="generateNewCard()">🎲 Nueva Tarjeta</button>
+                    <button class="btn" id="gameBtn" onclick="startGame()">▶️ Iniciar Juego</button>
+
+                    <button class="btn" onclick="resetGame()">🔄 Reiniciar Juego</button>
+                    <button class="btn" onclick="printCard()">🖨️ Imprimir</button>
+                </div>
+
+                <div class="current-ball" id="currentBall">
+                    <h3>Próxima pregunta en: <span id="countdown">30</span>s</h3>
+                    <div class="ball-display" id="ballDisplay">¡Presiona "Iniciar Juego"!</div>
+                </div>
+
+                <div id="bingoGrid" class="bingo-grid"></div>
+
+                <div class="stats">
+                    <p>Términos disponibles: <span id="termCount">49</span></p>
+                    <p>Casillas marcadas: <span id="markedCount">0</span></p>
+                    <p>Preguntas respondidas: <span id="drawnCount">0</span></p>
+                    <p>Errores: <span id="errorCount">0</span>/3</p>
+                </div>
+
+                <div class="drawn-balls">
+                    <h4>🎱 Bolas Sorteadas:</h4>
+                    <div class="ball-list" id="drawnBallsList"></div>
+                </div>
+            </div>
+
+            <div class="terms-section">
+                <div class="terms-header">
+                    <h2>📊 Cargar Datos desde Excel/Sheets</h2>
+                </div>
+
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 15px; border: 2px solid #ecf0f1;">
+                    <h3 style="color: #2c3e50; margin-bottom: 15px;">📋 Instrucciones para cargar datos:</h3>
+                    <ol style="color: #2c3e50; line-height: 1.6;">
+                        <li><strong>Formato requerido:</strong> Archivo CSV con dos columnas</li>
+                        <li><strong>Columna A:</strong> Preguntas</li>
+                        <li><strong>Columna B:</strong> Respuestas</li>
+                        <li><strong>Ejemplo:</strong><br>
+                            <code style="background: #e9ecef; padding: 5px; border-radius: 3px;">
+                                "¿Quién escribió Don Quijote?","Cervantes"<br>
+                                "¿Cuál es la obra de García Márquez?","Cien años de soledad"
+                            </code>
+                        </li>
+                    </ol>
+                    
+                    <div style="margin-top: 20px;">
+                        <input type="file" id="csvFile" accept=".csv" style="margin-bottom: 10px; padding: 10px; border: 2px solid #ecf0f1; border-radius: 8px; width: 100%;">
+                        <button class="btn" onclick="loadCSV()" style="width: 100%;">📂 Cargar Archivo CSV</button>
+                    </div>
+                    
+                    <div style="margin-top: 15px; padding: 10px; background: #d4edda; border-radius: 8px; border: 1px solid #c3e6cb;">
+                        <small style="color: #155724;">
+                            💡 <strong>Tip:</strong> Puedes exportar desde Excel o Google Sheets como CSV. 
+                            El juego incluye datos de ejemplo que puedes usar inmediatamente.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentGridSize = 3;
+        let literaryQuestions = {
+            "Gabriel García Márquez": "¿Quién escribió 'Cien años de soledad'?",
+            "Don Quijote": "¿Cuál es la obra más famosa de Cervantes?",
+            "Realismo mágico": "¿Qué corriente literaria mezcla lo fantástico con lo real?",
+            "Metáfora": "¿Cómo se llama la figura retórica que compara sin usar 'como'?",
+            "Hamlet": "¿Cuál es la tragedia más famosa de Shakespeare?",
+            "Jorge Luis Borges": "¿Quién escribió 'El Aleph' y 'Ficciones'?",
+            "Cien años de soledad": "¿Cuál es la obra cumbre del realismo mágico?",
+            "Novela": "¿Cómo se llama la narración extensa en prosa?",
+            "Símil": "¿Qué figura retórica usa 'como' para comparar?",
+            "Romeo y Julieta": "¿Cuál es la tragedia amorosa más famosa de Shakespeare?",
+            "Pablo Neruda": "¿Quién escribió 'Veinte poemas de amor'?",
+            "La Odisea": "¿Cuál es el poema épico de Homero sobre el regreso de Ulises?",
+            "Poesía": "¿Cómo se llama el género literario que expresa sentimientos en verso?",
+            "Hipérbole": "¿Qué figura retórica exagera la realidad?",
+            "Macbeth": "¿Cuál es la tragedia de Shakespeare sobre un rey escocés?",
+            "Isabel Allende": "¿Quién escribió 'La casa de los espíritus'?",
+            "El Principito": "¿Cuál es la obra más famosa de Saint-Exupéry?",
+            "Cuento": "¿Cómo se llama la narración breve en prosa?",
+            "Personificación": "¿Qué figura retórica da cualidades humanas a objetos?",
+            "Otelo": "¿Cuál es la tragedia de Shakespeare sobre los celos?",
+            "Mario Vargas Llosa": "¿Quién escribió 'La ciudad y los perros'?",
+            "1984": "¿Cuál es la distopía más famosa de George Orwell?",
+            "Ensayo": "¿Cómo se llama el texto reflexivo y argumentativo?",
+            "Ironía": "¿Qué figura retórica dice lo contrario de lo que se piensa?",
+            "Rey Lear": "¿Cuál es la tragedia de Shakespeare sobre un rey y sus hijas?",
+            "Octavio Paz": "¿Quién escribió 'El laberinto de la soledad'?",
+            "Rayuela": "¿Cuál es la obra más experimental de Julio Cortázar?",
+            "Drama": "¿Cómo se llama el género teatral serio?",
+            "Aliteración": "¿Qué figura retórica repite sonidos consonánticos?",
+            "Edipo Rey": "¿Cuál es la tragedia griega más famosa de Sófocles?",
+            "Julio Cortázar": "¿Quién escribió 'Rayuela' y 'Bestiario'?",
+            "Pedro Páramo": "¿Cuál es la obra más famosa de Juan Rulfo?",
+            "Lírica": "¿Cómo se llama la poesía que expresa sentimientos íntimos?",
+            "Oxímoron": "¿Qué figura retórica une conceptos contradictorios?",
+            "Antígona": "¿Cuál es la tragedia griega sobre la hija de Edipo?",
+            "Carlos Fuentes": "¿Quién escribió 'La muerte de Artemio Cruz'?",
+            "La casa de los espíritus": "¿Cuál es la primera novela de Isabel Allende?",
+            "Épica": "¿Cómo se llama la poesía que narra hazañas heroicas?",
+            "Sinécdoque": "¿Qué figura retórica toma la parte por el todo?",
+            "Medea": "¿Cuál es la tragedia griega sobre la hechicera vengativa?",
+            "Rubén Darío": "¿Quién fue el máximo exponente del modernismo hispanoamericano?",
+            "Ficciones": "¿Cuál es el libro de cuentos más famoso de Borges?",
+            "Modernismo": "¿Cómo se llama el movimiento literario de finales del siglo XIX?",
+            "Metonimia": "¿Qué figura retórica sustituye una palabra por otra relacionada?",
+            "Prometeo": "¿Quién robó el fuego para dárselo a los humanos en la mitología?",
+            "Sor Juana Inés": "¿Quién fue la monja poeta del barroco mexicano?",
+            "Laberinto de la soledad": "¿Cuál es el ensayo más famoso de Octavio Paz?",
+            "Barroco": "¿Cómo se llama el movimiento artístico del siglo XVII?",
+            "Anáfora": "¿Qué figura retórica repite palabras al inicio de versos?",
+            "Electra": "¿Cuál es la tragedia griega sobre la venganza filial?"
+        };
+
+        let drawnBalls = [];
+        let remainingBalls = Object.keys(literaryQuestions);
+        let gameInterval = null;
+        let isGameRunning = false;
+        let currentCard = [];
+        let currentQuestion = null;
+        let errorCount = 0;
+        let maxErrors = 3;
+
+        function initializeGame() {
+            generateNewCard();
+            updateStats();
+        }
+
+        function generateNewCard() {
+            const grid = document.getElementById('bingoGrid');
+            const totalCells = 9; // 3x3
+            
+            // Configurar la cuadrícula CSS para 3x3
+            grid.style.gridTemplateColumns = `repeat(3, 1fr)`;
+            
+            // Obtener 8 términos aleatorios (9 celdas - 1 espacio en blanco)
+            const shuffledTerms = [...Object.keys(literaryQuestions)].sort(() => Math.random() - 0.5);
+            const selectedTerms = shuffledTerms.slice(0, 8);
+            
+            // Crear array con términos y 1 espacio en blanco
+            const cardContent = [...selectedTerms, ''];
+            
+            // Mezclar el contenido para posición aleatoria del espacio en blanco
+            cardContent.sort(() => Math.random() - 0.5);
+            
+            // Guardar el cartón actual
+            currentCard = [...cardContent];
+            
+            grid.innerHTML = '';
+            
+            for (let i = 0; i < totalCells; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'bingo-cell';
+                cell.dataset.index = i;
+                
+                if (cardContent[i] === '') {
+                    cell.textContent = '';
+                    cell.className += ' free';
+                    cell.onclick = null;
+                } else {
+                    cell.textContent = cardContent[i];
+                    cell.onclick = () => toggleCell(cell);
+                }
+                
+                grid.appendChild(cell);
+            }
+            
+            updateStats();
+        }
+
+        function toggleCell(cell) {
+    if (!currentQuestion) return; // no hay pregunta activa
+
+    if (cell.textContent === currentQuestion) {
+        cell.classList.add('marked');
+        currentQuestion = null;
+    } else {
+        errorCount++;
+        updateStats();
+        if (errorCount >= maxErrors) {
+            stopGame();
+            alert("❌ Has cometido demasiados errores. Fin del juego.");
+        }
+    }
+}
+
+
+        function startGame() {
+            if (remainingBalls.length === 0) {
+                resetGame();
+            }
+            
+            isGameRunning = true;
+            document.getElementById('gameBtn').innerHTML = '⏸️ Pausar Juego';
+            document.getElementById('gameBtn').onclick = stopGame;
+            
+            // Sortear primera pregunta inmediatamente
+            drawBall();
+            
+            // Configurar intervalo para siguientes preguntas
+            let countdown = 30;
+            gameInterval = setInterval(() => {
+                countdown--;
+                document.getElementById('countdown').textContent = countdown;
+                
+                if (countdown <= 0) {
+                    drawBall();
+                    countdown = 30;
+                }
+            }, 1000);
+        }
+
+        function stopGame() {
+            isGameRunning = false;
+            clearInterval(gameInterval);
+            document.getElementById('gameBtn').innerHTML = '▶️ Continuar Juego';
+            document.getElementById('gameBtn').onclick = startGame;
+            document.getElementById('countdown').textContent = '30';
+        }
+
+        function resetGame() {
+            stopGame();
+            drawnBalls = [];
+            remainingBalls = [...Object.keys(literaryQuestions)];
+            currentQuestion = null;
+            errorCount = 0;
+            
+            document.getElementById('ballDisplay').textContent = '¡Presiona "Iniciar Juego"!';
+            document.getElementById('gameBtn').innerHTML = '▶️ Iniciar Juego';
+            document.getElementById('gameBtn').onclick = startGame;
+            document.getElementById('drawnBallsList').innerHTML = '';
+            
+            // Limpiar marcas del cartón
+            const cells = document.querySelectorAll('.bingo-cell:not(.free)');
+            cells.forEach(cell => cell.classList.remove('marked'));
+            
+            updateStats();
+        }
+
+        function drawBall() {
+            if (remainingBalls.length === 0) {
+                stopGame();
+                document.getElementById('ballDisplay').textContent = '¡Todas las preguntas han sido respondidas!';
+                return;
+            }
+            
+            // Sortear pregunta aleatoria
+            const randomIndex = Math.floor(Math.random() * remainingBalls.length);
+            const drawnAnswer = remainingBalls.splice(randomIndex, 1)[0];
+            const question = literaryQuestions[drawnAnswer];
+            
+            drawnBalls.push(drawnAnswer);
+            currentQuestion = drawnAnswer;
+            
+            // Mostrar pregunta
+            document.getElementById('ballDisplay').innerHTML = `<strong>${question}</strong><br><small>Haz clic en la respuesta correcta del cartón</small>`;
+            
+            // Marcar automáticamente si está en el cartón
+            const cells = document.querySelectorAll('.bingo-cell');
+            cells.forEach(cell => {
+                if (cell.textContent === drawnAnswer && !cell.classList.contains('free')) {
+                    cell.classList.add('marked');
+                }
+            });
+            
+            // Actualizar lista de preguntas respondidas
+            updateDrawnBallsList();
+            updateStats();
+            checkBingo();
+            
+            // Reiniciar countdown
+            document.getElementById('countdown').textContent = '30';
+        }
+
+        function updateDrawnBallsList() {
+            const list = document.getElementById('drawnBallsList');
+            list.innerHTML = '';
+            
+            drawnBalls.forEach(ball => {
+                const ballElement = document.createElement('span');
+                ballElement.className = 'ball-item';
+                ballElement.textContent = ball;
+                list.appendChild(ballElement);
+            });
+        }
+
+        function checkBingo() {
+            const cells = document.querySelectorAll('.bingo-cell');
+            const grid = Array.from(cells);
+            
+            // Solo verificar cartón completo (3x3)
+            let allMarked = true;
+            for (let cell of grid) {
+                if (!cell.classList.contains('marked') && !cell.classList.contains('free')) {
+                    allMarked = false;
+                    break;
+                }
+            }
+            if (allMarked) {
+                celebrateBingo('cartón completo');
+            }
+        }
+
+        function celebrateBingo(type) {
+            stopGame();
+            alert(`¡🎉 BINGO! ¡Has completado el ${type}! 🎉`);
+            document.getElementById('ballDisplay').textContent = `¡BINGO! ¡Cartón completo!`;
+            document.getElementById('gameBtn').innerHTML = '🎉 ¡Ganaste!';
+        }
+
+        function loadCSV() {
+            const fileInput = document.getElementById('csvFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Por favor selecciona un archivo CSV');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const csv = e.target.result;
+                const lines = csv.split('\n');
+                const newQuestions = {};
+                
+                lines.forEach(line => {
+                    if (line.trim()) {
+                        // Parsear CSV simple (maneja comillas)
+                        const matches = line.match(/^"([^"]+)","([^"]+)"$/) || line.match(/^([^,]+),([^,]+)$/);
+                        if (matches) {
+                            const question = matches[1].trim();
+                            const answer = matches[2].trim();
+                            newQuestions[answer] = question;
+                        }
+                    }
+                });
+                
+                if (Object.keys(newQuestions).length > 0) {
+                    literaryQuestions = newQuestions;
+                    remainingBalls = [...Object.keys(literaryQuestions)];
+                    generateNewCard();
+                    updateStats();
+                    alert(`✅ Se cargaron ${Object.keys(newQuestions).length} preguntas y respuestas correctamente`);
+                } else {
+                    alert('❌ No se pudieron cargar las preguntas. Verifica el formato del archivo CSV');
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+
+
+
+        function updateStats() {
+            document.getElementById('termCount').textContent = Object.keys(literaryQuestions).length;
+            const markedCells = document.querySelectorAll('.bingo-cell.marked').length;
+            document.getElementById('markedCount').textContent = markedCells;
+            document.getElementById('drawnCount').textContent = drawnBalls.length;
+            document.getElementById('errorCount').textContent = errorCount;
+        }
+
+        function printCard() {
+            window.print();
+        }
+
+
+
+        // Inicializar el juego
+        initializeGame();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97683938514ea793',t:'MTc1NjQzMDQwMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
